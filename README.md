@@ -17,9 +17,9 @@ Hacknet: Archipelago (referred to as **HacknetAP** from here on out) is a [Pathf
 To install the mod, download the ZIP file from the Releases section, and unzip it into the `BepInEx/plugins` directory of your Hacknet: Pathfinder installation.
 
 ## I don't see Hacknet on the site?
-Hacknet is not currently officially supported by Archipelago at the moment, but that doesn't mean you can't play it! Hacknet is available [as an APWorld](https://example.com/), requiring you to simply plop the .apworld file into the `lib/worlds` directory of your Archipelago installation.
+Hacknet is not currently officially supported by Archipelago at the moment, but that doesn't mean you can't play it! Hacknet is available [as an APWorld](https://diamondgrid.net/archipelago/files/hacknet/hacknet.apworld), requiring you to simply plop the .apworld file into the `lib/worlds` directory of your Archipelago installation.
 
-To create a YAML profile for HacknetAP, please visit [this website](https://diamondgrid.net/tools/archipelago/hacknet). Follow the instructions on said website in order to generate a player YAML for a Hacknet session in Archipelago.
+To create a YAML profile for HacknetAP, please visit [this website](https://diamondgrid.net/archipelago/files/tools/hacknet/hacknet.html). Follow the instructions on said website in order to generate a player YAML for a Hacknet session in Archipelago.
 
 ---
 
