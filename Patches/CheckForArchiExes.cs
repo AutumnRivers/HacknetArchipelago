@@ -17,39 +17,6 @@ using static System.Collections.Specialized.BitVector32;
 
 namespace HacknetArchipelago.Patches
 {
-    /*[HarmonyPatch]
-    public class CheckForArchipelagoExecutables
-    {
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(ComputerLoader),nameof(ComputerLoader.loadComputer))]
-        static void Postfix(ref object __result)
-        {
-            Computer currentComp = (Computer)__result;
-            ArchipelagoSession archiSession = HacknetAPMod.archiSession;
-
-            List<string> receivedItems = new List<string>();
-
-            foreach(NetworkItem archiItem in archiSession.Items.AllItemsReceived)
-            {
-                long itemID = archiItem.Item;
-                string itemName = archiSession.Items.GetItemName(itemID);
-                receivedItems.Add(itemName);
-            }
-
-            foreach(FileEntry file in currentComp.files.root.files)
-            {
-                if(file.name.Length >= 5) {
-                    string fileName = file.name.Substring(0, file.name.Length - 4); // Removes file extensions
-
-                    if(!receivedItems.Exists(f => f == fileName))
-                    {
-                        currentComp.files.root.files.RemoveAll(f => f.data == file.data);
-                    }
-                }
-            }
-        }
-    }*/
-
     [HarmonyPatch]
     public class ReplaceFileEntry
     {
@@ -64,10 +31,28 @@ namespace HacknetArchipelago.Patches
 
             if (!nameEntry.EndsWith(".exe")) { return true; }
 
-            string fileName = nameEntry.Substring(0, nameEntry.Length - 4);
+            List<string> possibleExeData = new List<string>();
+            List<string> receivedData = new List<string>();
 
-            if(items.ContainsKey(fileName.ToLower()) && !receivedItems.Contains(fileName.ToLower()))
+            foreach(var port in items.Values)
             {
+                string fileData = PortExploits.crackExeData[port];
+                possibleExeData.Add(fileData);
+            }
+
+            foreach(var rItem in receivedItems)
+            {
+                if (!items.ContainsKey(rItem)) { continue; }
+
+                int itemPort = items[rItem];
+
+                string itemData = PortExploits.crackExeData[itemPort];
+                receivedData.Add(itemData);
+            }
+
+            if (possibleExeData.Contains(dataEntry) && !receivedData.Contains(dataEntry))
+            {
+
                 dataEntry = "There's usually a " + nameEntry + " here, but you haven't unlocked it yet! Venture forth in this Archipelago!";
                 nameEntry = "BLOCKED_" + nameEntry;
             }

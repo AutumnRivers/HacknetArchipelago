@@ -28,6 +28,10 @@ using Archipelago.MultiClient.Net.Helpers;
 
 using System.Xml.Linq;
 using Pathfinder.Util.XML;
+using Archipelago.MultiClient.Net.Models;
+using Pathfinder.Util;
+
+using xvec2 = Microsoft.Xna.Framework.Vector2;
 
 namespace HacknetArchipelago
 {
@@ -37,7 +41,7 @@ namespace HacknetArchipelago
     {
         public const string ModGUID = "autumnrivers.hacknetapclient";
         public const string ModName = "Hacknet_Archipelago";
-        public const string ModVer = "0.1.0";
+        public const string ModVer = "0.1.1";
 
         public static ArchipelagoSession archiSession;
 
@@ -46,6 +50,8 @@ namespace HacknetArchipelago
         public static List<string> receivedItems = new List<string>();
         public static List<string> completedEvents = new List<string>();
         public static List<string> checkedNodes = new List<string>();
+
+        public static bool hasCompletedSetup = false;
 
         private List<string> checkedFlags = new List<string>();
 
@@ -72,52 +78,99 @@ namespace HacknetArchipelago
 
             os.Flags.AddFlag("CSEC_Member");
 
+            CreateArchipelagoBackupNode();
+
             if(archiSession.ConnectionInfo.Slot > -1)
             {
                 archiSession.Items.ItemReceived += CheckReceivedItems;
+
+                if(hasCompletedSetup) { CheckAlreadyReceivedItems(); }
             }
         }
 
-        public void CheckAlreadyReceivedItems()
+        public static void CreateArchipelagoBackupNode()
         {
-            if(archiSession.ConnectionInfo.Slot == -1) { return; }
+            Computer existingBackupNode = ComputerLookup.FindById("archipelagoBackup");
 
-            var receivedItems = archiSession.Items.AllItemsReceived;
+            if(existingBackupNode != null) { return; }
+
+            Computer backupNode = new Computer("Archipelago Backup Node", "archipelago.gg", new xvec2(0.5f, 0.5f), 0, 4, OS.currentInstance);
+            backupNode.idName = "archipelagoBackup";
+
+            FileEntry archipelagoNote = new FileEntry("Archipelago Backups Server: connect archipelago.gg", "ArchipelagoBackups.txt");
+            OS.currentInstance.thisComputer.files.root.files.Add(archipelagoNote);
+
+            OS.currentInstance.netMap.nodes.Add(backupNode);
         }
 
-        public void CheckReceivedItems(ReceivedItemsHelper receivedItemsHelper)
+        public static bool CheckItem(NetworkItem item)
         {
-            var itemReceivedName = receivedItemsHelper.PeekItemName();
+            long itemID = item.Item;
+            string itemName = archiSession.Items.GetItemName(itemID);
 
-            if (itemReceivedName == "ETASTrap")
+            if(receivedItems.Contains(itemName.ToLower())) { return false; }
+
+            if (itemName == "ETASTrap")
             {
                 ETASTrap();
-            } else if (itemReceivedName == "Fake Connect")
+            }
+            else if (itemName == "Fake Connect")
             {
-                int playerSlot = receivedItemsHelper.PeekItem().Player;
+                int playerSlot = item.Player;
                 string playerName = archiSession.Players.GetPlayerName(playerSlot);
 
                 FakeConnectTrap(playerName);
-            } else if (!receivedItems.Contains(itemReceivedName.ToLower()))
+            }
+            else
             {
-                int receivedItemPort = ArchipelagoItems.ItemNamesAndPortIDs.First(e => e.Key == itemReceivedName.ToLower()).Value;
-                receivedItems.Add(itemReceivedName.ToLower());
+                int receivedItemPort = ArchipelagoItems.ItemNamesAndPortIDs.First(e => e.Key == itemName.ToLower()).Value;
+                receivedItems.Add(itemName.ToLower());
 
                 var exeContent = PortExploits.crackExeData[receivedItemPort];
 
                 SAAddAsset addFileAction = new SAAddAsset
                 {
-                    FileName = itemReceivedName + ".exe",
+                    FileName = itemName + ".exe",
                     FileContents = exeContent,
                     TargetFolderpath = "bin",
                     TargetComp = "playerComp"
                 };
 
+                SAAddAsset addFileToBackupServerAction = new SAAddAsset
+                {
+                    FileName = itemName + ".exe",
+                    FileContents = exeContent,
+                    TargetFolderpath = "bin",
+                    TargetComp = "archipelagoBackup"
+                };
+
                 addFileAction.Trigger(OS.currentInstance);
+                addFileToBackupServerAction.Trigger(OS.currentInstance);
 
                 OS.currentInstance.warningFlash();
-                OS.currentInstance.terminal.writeLine("You received " + itemReceivedName + "!");
+                OS.currentInstance.terminal.writeLine("You received " + itemName + "!");
             }
+
+            return true;
+        }
+
+        public static void CheckAlreadyReceivedItems()
+        {
+            if(archiSession.ConnectionInfo.Slot == -1) { return; }
+
+            var afkReceivedItems = archiSession.Items.AllItemsReceived;
+
+            foreach(var item in afkReceivedItems)
+            {
+                CheckItem(item);
+            }
+        }
+
+        public static void CheckReceivedItems(ReceivedItemsHelper receivedItemsHelper)
+        {
+            if(OS.currentInstance == null) { return; } // Do not dequeue item if user is not in-game
+
+            CheckItem(receivedItemsHelper.PeekItem());
 
             receivedItemsHelper.DequeueItem();
         }
@@ -163,7 +216,7 @@ namespace HacknetArchipelago
             save_event.Save.Add(archipelagoElement);
         }
 
-        private void ETASTrap()
+        private static void ETASTrap()
         {
             OS os = OS.currentInstance;
 
@@ -175,7 +228,7 @@ namespace HacknetArchipelago
             }, os);
         }
 
-        private void FakeConnectTrap(string offender)
+        private static void FakeConnectTrap(string offender)
         {
             OS os = OS.currentInstance;
 
@@ -240,6 +293,19 @@ namespace HacknetArchipelago
         }
     }
 
+    [HarmonyPatch]
+    public class CheckForTutorialKill
+    {
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(AdvancedTutorial),nameof(AdvancedTutorial.Killed))]
+        static void Postfix()
+        {
+            HacknetAPMod.hasCompletedSetup = true;
+            HacknetAPMod.CreateArchipelagoBackupNode();
+            HacknetAPMod.CheckAlreadyReceivedItems();
+        }
+    }
+
     [SaveExecutor("HacknetSave.HacknetArchipelagoData")]
     public class ReadArchipelagoSaveData : SaveLoader.SaveExecutor
     {
@@ -255,6 +321,8 @@ namespace HacknetArchipelago
 
             HacknetAPMod.receivedItems = receivedItems;
             HacknetAPMod.completedEvents = completedEvents;
+
+            HacknetAPMod.hasCompletedSetup = true;
         }
 
         public override void Execute(EventExecutor exec, ElementInfo info) { LoadSaveData(info); }
