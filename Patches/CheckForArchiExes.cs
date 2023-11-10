@@ -9,12 +9,6 @@ using Hacknet;
 
 using HacknetArchipelago.Static;
 
-using Archipelago.MultiClient.Net;
-using Archipelago.MultiClient.Net.Models;
-
-using System.Collections;
-using static System.Collections.Specialized.BitVector32;
-
 namespace HacknetArchipelago.Patches
 {
     [HarmonyPatch]
@@ -28,14 +22,26 @@ namespace HacknetArchipelago.Patches
         {
             var items = ArchipelagoItems.ItemNamesAndPortIDs;
             var receivedItems = HacknetAPMod.receivedItems;
+            var session = HacknetAPMod.archiSession;
 
-            if (!nameEntry.EndsWith(".exe")) { return true; }
+            if (!nameEntry.EndsWith(".exe") || session.ConnectionInfo.Slot == -1) { return true; }
 
             List<string> possibleExeData = new List<string>();
             List<string> receivedData = new List<string>();
 
-            foreach(var port in items.Values)
+            foreach(var item in items)
             {
+                int playerExecs = int.Parse(session.DataStorage.GetSlotData()["victory_condition"].ToString());
+                
+                if(
+                    playerExecs == (int)ArchipelagoEnums.ShuffleExecutableTypes.ProgressiveAndUseful &&
+                    (!ArchipelagoItems.UsefulItems.Contains(item.Key) && !ArchipelagoItems.ProgressionItems.Contains(item.Key))
+                    ) { continue; } else if(
+                    playerExecs == (int)ArchipelagoEnums.ShuffleExecutableTypes.ProgressionOnly &&
+                    !ArchipelagoItems.ProgressionItems.Contains(item.Key)
+                    ) { continue; }
+
+                int port = item.Value;
                 string fileData = PortExploits.crackExeData[port];
                 possibleExeData.Add(fileData);
             }

@@ -31,7 +31,7 @@ namespace HacknetArchipelago.Patches
 
                 if(HacknetAPMod.archiSession.ConnectionInfo.Slot == -1) { return; }
 
-                var nodeLocations = ArchipelagoLocations.NodeIDsToLocations;
+                var nodeLocations = ArchipelagoLocations.NodeIDToLocations;
 
                 if(!nodeLocations.ContainsKey(__instance.idName)) { return; }
 

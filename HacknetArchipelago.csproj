@@ -80,16 +80,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\ArchipelagoStatusCommand.cs" />
     <Compile Include="Commands\DebugCommands.cs" />
     <Compile Include="HacknetAPClient.cs" />
     <Compile Include="Options\ArchipelagoOptions.cs" />
     <Compile Include="Patches\ArchipelagoMainMenu.cs" />
     <Compile Include="Patches\CheckForArchiExes.cs" />
+    <Compile Include="Patches\DLCCredits.cs" />
     <Compile Include="Patches\Missions\PatchMissions.cs" />
     <Compile Include="Patches\NodeChecks.cs" />
     <Compile Include="Patches\PortHackHeartPatch.cs" />
     <Compile Include="Patches\ReplaceBootText.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Static\ArchipelagoEnums.cs" />
     <Compile Include="Static\ArchipelagoItems.cs" />
     <Compile Include="Static\ArchipelagoLocations.cs" />
   </ItemGroup>

@@ -41,7 +41,7 @@ namespace HacknetArchipelago
     {
         public const string ModGUID = "autumnrivers.hacknetapclient";
         public const string ModName = "Hacknet_Archipelago";
-        public const string ModVer = "0.1.1";
+        public const string ModVer = "0.2.0";
 
         public static ArchipelagoSession archiSession;
 
@@ -60,6 +60,9 @@ namespace HacknetArchipelago
             HarmonyInstance.PatchAll(typeof(HacknetAPMod).Assembly);
 
             CommandManager.RegisterCommand("checkitems", DebugCommands.CheckReceivedItems, true, false);
+            CommandManager.RegisterCommand("architest", DebugCommands.SendTestPacket, false, true);
+            CommandManager.RegisterCommand("fakeconnect", DebugCommands.TestFakeConnect, false, true);
+            CommandManager.RegisterCommand("archistatus", ArchipelagoStatusCommand.Command, true, false);
 
             Action<OSLoadedEvent> fixCampaign = StartCampaignFix;
             Action<SaveEvent> archipelagoSave = InjectArchipelagoSaveData;
@@ -216,19 +219,14 @@ namespace HacknetArchipelago
             save_event.Save.Add(archipelagoElement);
         }
 
-        private static void ETASTrap()
+        public static void ETASTrap()
         {
             OS os = OS.currentInstance;
 
-            HackerScriptExecuter.executeThreadedScript(new string[]
-            {
-                "config playerComp jmail 0.1 $#%#$",
-                " ",
-                "instanttrace $#%#$"
-            }, os);
+            TrackerCompleteSequence.TriggerETAS(os);
         }
 
-        private static void FakeConnectTrap(string offender)
+        public static void FakeConnectTrap(string offender)
         {
             OS os = OS.currentInstance;
 
@@ -311,7 +309,7 @@ namespace HacknetArchipelago
     {
         public void LoadSaveData(ElementInfo info)
         {
-            char[] delimiterChar = ",".ToCharArray();
+            char delimiterChar = ',';
 
             string[] itemsArray = info.Attributes["ReceivedItems"].Split(delimiterChar);
             string[] eventsArray = info.Attributes["CompletedEvents"].Split(delimiterChar);

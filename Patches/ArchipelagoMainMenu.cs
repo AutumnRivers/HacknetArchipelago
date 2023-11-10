@@ -115,6 +115,7 @@ namespace HacknetArchipelago.Patches
 
                         Console.WriteLine(errorMessage);
                         hasError = true;
+                        isConnected = false;
                     }
                 }
             }

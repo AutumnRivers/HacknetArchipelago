@@ -36,6 +36,22 @@ namespace HacknetArchipelago.Static
             { "clockv2", 38 }
         };
 
+        public static readonly List<string> ProgressionItems = new List<string>()
+        {
+            "sshcrack", "ftpbounce", "smtpoverflow", "sql_memcorrupt", "webserverworm",
+            "kbtporttest", "decyper", "dechead", "eosdevicescan", "torrentstreaminjector",
+            "ssltrojan", "ftpsprint", "memdumpgenerator", "memforensics", "signalscrambler",
+            "pacificportcrusher"
+        };
+
+        public static readonly List<string> UsefulItems = new List<string>()
+        {
+            "opshell",
+            "tracekill",
+            "comshell",
+            "netmaporganizer"
+        };
+
         public static readonly Dictionary<string, string> ItemFlags = new Dictionary<string, string>()
         {
             { "Labyrinths_Linker", "hasLabsLinker" }

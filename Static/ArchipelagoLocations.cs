@@ -81,11 +81,7 @@ namespace HacknetArchipelago.Static
             { "psTrial04", "NODE Polar Star / Trial of Focus" },
             { "honeypot01", "NODE CCC Hacksquad Dump" },
             { "dCoelgateway", "NODE Coel_Gateway" },
-            { "dNaixSecretLink", "NODE Pellium Box" }
-        };
-
-        public static readonly Dictionary<string, string> NodeIDsToLocations = new Dictionary<string, string>()
-        {
+            { "dNaixSecretLink", "NODE Pellium Box" },
             { "dGibson", "LABS Break Into Gibson" }
         };
     }
