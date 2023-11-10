@@ -83,8 +83,10 @@
     <Compile Include="Commands\DebugCommands.cs" />
     <Compile Include="HacknetAPClient.cs" />
     <Compile Include="Options\ArchipelagoOptions.cs" />
+    <Compile Include="Patches\ArchipelagoMainMenu.cs" />
     <Compile Include="Patches\CheckForArchiExes.cs" />
     <Compile Include="Patches\Missions\PatchMissions.cs" />
+    <Compile Include="Patches\NodeChecks.cs" />
     <Compile Include="Patches\PortHackHeartPatch.cs" />
     <Compile Include="Patches\ReplaceBootText.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -93,7 +95,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="README.md" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="assets\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -13,7 +13,6 @@ using Pathfinder.Event.Loading;
 using Pathfinder.Event;
 
 using Archipelago.MultiClient.Net;
-using Archipelago.MultiClient.Net.Enums;
 
 using Pathfinder.Replacements;
 using Pathfinder.Meta.Load;
@@ -38,17 +37,17 @@ namespace HacknetArchipelago
     {
         public const string ModGUID = "autumnrivers.hacknetapclient";
         public const string ModName = "Hacknet_Archipelago";
-        public const string ModVer = "0.0.1";
-
-        public static List<string> completedEvents = new List<string>();
-
-        private readonly string defaultAPURI = "localhost";
-        private readonly int defaultAPPort = 38281;
+        public const string ModVer = "0.1.0";
 
         public static ArchipelagoSession archiSession;
 
         public static Dictionary<string, string> archiLocationNames = ArchipelagoLocations.MNameToArchiLocation;
+
         public static List<string> receivedItems = new List<string>();
+        public static List<string> completedEvents = new List<string>();
+        public static List<string> checkedNodes = new List<string>();
+
+        private List<string> checkedFlags = new List<string>();
 
         public override bool Load()
         {
@@ -61,6 +60,8 @@ namespace HacknetArchipelago
 
             EventManager<OSLoadedEvent>.AddHandler(fixCampaign);
             EventManager<SaveEvent>.AddHandler(archipelagoSave);
+
+            Settings.AllowExtensionMode = false;
             
             return true;
         }
@@ -71,44 +72,32 @@ namespace HacknetArchipelago
 
             os.Flags.AddFlag("CSEC_Member");
 
-            archiSession = ArchipelagoSessionFactory.CreateSession(defaultAPURI, defaultAPPort);
-            LoginResult archiLogin = archiSession.TryConnectAndLogin("Hacknet", "AutumnHN", ItemsHandlingFlags.AllItems);
-
-            if(archiLogin.Successful)
+            if(archiSession.ConnectionInfo.Slot > -1)
             {
-                os.terminal.writeLine("Successfully connected to Archipelago.");
-                Console.WriteLine("[Hacknet_Archipelago] Connected to the Archipelago session.");
-                Console.WriteLine(archiLogin.ToString());
-
                 archiSession.Items.ItemReceived += CheckReceivedItems;
-            } else
-            {
-                Console.WriteLine("[Hacknet_Archipelago] Error attempting to connect to Archipelago:");
-
-                LoginFailure failure = (LoginFailure)archiLogin;
-
-                string errorMessage = $"Failed to Connect to {defaultAPURI} as AutumnHN:";
-
-                foreach (string error in failure.Errors)
-                {
-                    errorMessage += $"\n    {error}";
-                }
-                foreach (ConnectionRefusedError error in failure.ErrorCodes)
-                {
-                    errorMessage += $"\n    {error}";
-                }
-
-                Console.WriteLine(errorMessage);
             }
+        }
+
+        public void CheckAlreadyReceivedItems()
+        {
+            if(archiSession.ConnectionInfo.Slot == -1) { return; }
+
+            var receivedItems = archiSession.Items.AllItemsReceived;
         }
 
         public void CheckReceivedItems(ReceivedItemsHelper receivedItemsHelper)
         {
             var itemReceivedName = receivedItemsHelper.PeekItemName();
 
-            if(itemReceivedName == "ETASTrap")
+            if (itemReceivedName == "ETASTrap")
             {
                 ETASTrap();
+            } else if (itemReceivedName == "Fake Connect")
+            {
+                int playerSlot = receivedItemsHelper.PeekItem().Player;
+                string playerName = archiSession.Players.GetPlayerName(playerSlot);
+
+                FakeConnectTrap(playerName);
             } else if (!receivedItems.Contains(itemReceivedName.ToLower()))
             {
                 int receivedItemPort = ArchipelagoItems.ItemNamesAndPortIDs.First(e => e.Key == itemReceivedName.ToLower()).Value;
@@ -135,26 +124,31 @@ namespace HacknetArchipelago
 
         public void CheckForFlags(OSUpdateEvent os_update)
         {
-            /*OS os = os_update.OS;
-            ProgressionFlags currentFlags = os.Flags;
-            Folder userFolder = os.thisComputer.files.root;
+            OS os = os_update.OS;
+            List<string> currentFlags = os.Flags.Flags;
 
-            if(!completedEvents.Exists(e => e == "finishedIntro"))
+            foreach(string flag in currentFlags)
             {
-                for (var index = 0; index < userFolder.folders.Count; ++index)
-                {
-                    if (userFolder.folders[index].searchForFile("Entropy_Induction_Test") != null)
-                    {
-                        long introLocationID = archiSession.Locations.GetLocationIdFromName("Hacknet", "INTRO Complete Introduction");
+                if(checkedFlags.Contains(flag)) { continue; }
 
-                        archiSession.Locations.CompleteLocationChecks(new long[] {introLocationID});
+                checkedFlags.Add(flag);
 
-                        os.terminal.writeLine("HACKNET_ARCHIPELAGO: You found a check!");
+                var flagLocations = ArchipelagoLocations.FlagsToLocations;
 
-                        completedEvents.Add("finishedIntro");
-                    }
-                }
-            }*/
+                if(!flagLocations.ContainsKey(flag)) { continue; }
+
+                string locationName = flagLocations[flag];
+
+                long flagLocationID = archiSession.Locations.GetLocationIdFromName("Hacknet", locationName);
+
+                if(flagLocationID == -1) { continue; }
+
+                archiSession.Locations.CompleteLocationChecks(flagLocationID);
+
+                os.terminal.writeLine("HACKNET_ARCHIPELAGO: You found a check!");
+
+                completedEvents.Add(flag);
+            }
         }
 
         public void InjectArchipelagoSaveData(SaveEvent save_event)
@@ -179,6 +173,16 @@ namespace HacknetArchipelago
                 " ",
                 "instanttrace $#%#$"
             }, os);
+        }
+
+        private void FakeConnectTrap(string offender)
+        {
+            OS os = OS.currentInstance;
+
+            os.IncConnectionOverlay.Activate();
+            os.warningFlash();
+            os.beepSound.Play();
+            os.thisComputer.log(offender + " got you with a fake connection!");
         }
     }
 
@@ -226,9 +230,6 @@ namespace HacknetArchipelago
                 string archiLocation = locNames[missionName];
 
                 long missionLocationID = HacknetAPMod.archiSession.Locations.GetLocationIdFromName("Hacknet", archiLocation);
-
-                Console.WriteLine("Current Archi Location: " + archiLocation);
-                Console.WriteLine("Current Location ID: " + missionLocationID);
 
                 HacknetAPMod.archiSession.Locations.CompleteLocationChecks(missionLocationID);
 

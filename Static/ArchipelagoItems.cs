@@ -35,5 +35,10 @@ namespace HacknetArchipelago.Static
             { "tuneswap", 39 },
             { "clockv2", 38 }
         };
+
+        public static readonly Dictionary<string, string> ItemFlags = new Dictionary<string, string>()
+        {
+            { "Labyrinths_Linker", "hasLabsLinker" }
+        };
     }
 }

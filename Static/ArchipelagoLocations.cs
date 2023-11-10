@@ -42,9 +42,51 @@ namespace HacknetArchipelago.Static
             { "Bit -- Investigation", "VBIT Investigation" },
             { "Bit -- Propagation", "VBIT Propagation" },
             { "Bit -- Vindication", "VBIT Vindication" },
-            { "Bit -- Termination", "VBIT Termination / Sequencer" }
+            { "Bit -- Termination", "VBIT Termination / Sequencer" },
 
-            // TODO: Add Labyrinths
+            { "The Ricer", "LABS The Ricer" },
+            { "DDOSer on some critical servers", "LABS DDOSer On Critical Servers" },
+            { "It Follows", "LABS It Follows" },
+            { "Bean Stalk", "LABS Bean Stalk" },
+            { "Expo Grave", "LABS Expo Grave" },
+            { "The Keyboard Life", "LABS The Keyboard Life" },
+            { "The Hermetic Alchemists", "LABS Hermetic Alchemists" },
+            { "Memory Forensics", "LABS Memory Forensics" },
+            { "Neopals", "LABS Neopals" },
+            { "Striker's Stash", "LABS Striker's Stash" },
+            { "Take Flight", "LABS Take Flight" },
+            { "Take_Flight Cont.", "LABS Take Flight Cont." }
+        };
+
+        public static readonly Dictionary<string, string> FlagsToLocations = new Dictionary<string, string>()
+        {
+            { "DLC_Player_IRC_Authenticated", "LABS Finish Kaguya Trials" },
+            { "dlc_complete", "LABS Altitude Loss" },
+            { "startupBreakinTrapPassed", "STRK CoelTrain Recovery" },
+            { "BootFailureThemeSongChange", "NAIX Recover" },
+
+            { "pointclicker_basic_Unlocked", "ACHV PointClicker" },
+            { "pointclicker_expert_Unlocked", "ACHV You better not have clicked for those..." },
+            { "themeswitch_run_Unlocked", "ACHV Makeover" },
+            { "trace_close_Unlocked", "ACHV To the Wire" }
+        };
+
+        public static readonly Dictionary<string, string> NodeIDToLocations = new Dictionary<string, string>()
+        {
+            { "viperScanEarlyGame", "NODE Entropy Asset Cache" },
+            { "clockServer", "NODE Timekeeper's Vault" },
+            { "psTrial01", "NODE Polar Star / Trial of Patience" },
+            { "psTrial02", "NODE Polar Star / Trial of Haste" },
+            { "psTrial03b", "NODE Polar Star / Trial of Dilligence" },
+            { "psTrial04", "NODE Polar Star / Trial of Focus" },
+            { "honeypot01", "NODE CCC Hacksquad Dump" },
+            { "dCoelgateway", "NODE Coel_Gateway" },
+            { "dNaixSecretLink", "NODE Pellium Box" }
+        };
+
+        public static readonly Dictionary<string, string> NodeIDsToLocations = new Dictionary<string, string>()
+        {
+            { "dGibson", "LABS Break Into Gibson" }
         };
     }
 }
