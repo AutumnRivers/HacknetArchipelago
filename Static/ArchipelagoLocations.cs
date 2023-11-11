@@ -6,6 +6,10 @@ namespace HacknetArchipelago.Static
     {
         public static readonly Dictionary<string, string> MNameToArchiLocation = new Dictionary<string, string>()
         {
+            { "First Contact", "INTRO First Contact" },
+            { "Getting some tools together", "INTRO Getting Some Tools Together" },
+            { "Maiden Flight", "INTRO Maiden Flight" },
+            { "Something in return", "INTRO Something In Return" },
             { "Where to from here", "INTRO Complete Introduction" },
 
             { "Confirmation Mission", "ENT Intro / Confirmation" },
@@ -68,7 +72,8 @@ namespace HacknetArchipelago.Static
             { "pointclicker_basic_Unlocked", "ACHV PointClicker" },
             { "pointclicker_expert_Unlocked", "ACHV You better not have clicked for those..." },
             { "themeswitch_run_Unlocked", "ACHV Makeover" },
-            { "trace_close_Unlocked", "ACHV To the Wire" }
+            { "trace_close_Unlocked", "ACHV To the Wire" },
+            { "kill_tutorial_Unlocked", "ACHV Quickdraw" }
         };
 
         public static readonly Dictionary<string, string> NodeIDToLocations = new Dictionary<string, string>()

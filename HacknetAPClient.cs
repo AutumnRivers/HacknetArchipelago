@@ -38,7 +38,7 @@ namespace HacknetArchipelago
     {
         public const string ModGUID = "autumnrivers.hacknetapclient";
         public const string ModName = "Hacknet_Archipelago";
-        public const string ModVer = "0.2.0";
+        public const string ModVer = "0.2.1";
 
         public static ArchipelagoSession archiSession;
 
@@ -133,24 +133,27 @@ namespace HacknetArchipelago
 
                 var exeContent = PortExploits.crackExeData[receivedItemPort];
 
-                SAAddAsset addFileAction = new SAAddAsset
+                if(ArchipelagoItems.ItemNamesAndPortIDs.ContainsKey(itemName.ToLower()))
                 {
-                    FileName = itemName + ".exe",
-                    FileContents = exeContent,
-                    TargetFolderpath = "bin",
-                    TargetComp = "playerComp"
-                };
+                    SAAddAsset addFileAction = new SAAddAsset
+                    {
+                        FileName = itemName + ".exe",
+                        FileContents = exeContent,
+                        TargetFolderpath = "bin",
+                        TargetComp = "playerComp"
+                    };
 
-                SAAddAsset addFileToBackupServerAction = new SAAddAsset
-                {
-                    FileName = itemName + ".exe",
-                    FileContents = exeContent,
-                    TargetFolderpath = "bin",
-                    TargetComp = "archipelagoBackup"
-                };
+                    SAAddAsset addFileToBackupServerAction = new SAAddAsset
+                    {
+                        FileName = itemName + ".exe",
+                        FileContents = exeContent,
+                        TargetFolderpath = "bin",
+                        TargetComp = "archipelagoBackup"
+                    };
 
-                addFileAction.Trigger(OS.currentInstance);
-                addFileToBackupServerAction.Trigger(OS.currentInstance);
+                    addFileAction.Trigger(OS.currentInstance);
+                    addFileToBackupServerAction.Trigger(OS.currentInstance);
+                }
 
                 OS.currentInstance.warningFlash();
                 OS.currentInstance.terminal.writeLine("You received " + itemName + "!");
@@ -229,11 +232,18 @@ namespace HacknetArchipelago
         public static void FakeConnectTrap(string offender)
         {
             OS os = OS.currentInstance;
+            string currentPlayerName = "";
+
+            if(archiSession.ConnectionInfo.Slot > -1) {
+                currentPlayerName = archiSession.Players.GetPlayerName(archiSession.ConnectionInfo.Slot);
+            }
 
             os.IncConnectionOverlay.Activate();
             os.warningFlash();
             os.beepSound.Play();
-            os.thisComputer.log(offender + " got you with a fake connection!");
+
+            if(offender == currentPlayerName) { os.thisComputer.log("You got yourself with a fake connection!"); }
+            else { os.thisComputer.log(offender + " got you with a fake connection!"); }
         }
     }
 
