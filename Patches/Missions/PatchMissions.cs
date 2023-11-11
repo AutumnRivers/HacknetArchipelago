@@ -41,17 +41,11 @@ namespace HacknetArchipelago.Patches.Missions
 
             if(filename.EndsWith(".exe"))
             {
-                Console.WriteLine("[Hacknet_Archipelago] Replacing FileDownloadMission...");
-                Console.WriteLine("[*] Target Computer ID: " + __instance.targetComp);
-                Console.WriteLine("[*] Target File: " + __instance.target);
-
                 Computer targetComp;
 
                 Regex ipRegex = new Regex(@"^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$");
 
                 Match isIP = ipRegex.Match(__instance.targetComp);
-
-                Console.WriteLine("[*] " + __instance.targetComp + " is an IP: " + isIP.Success);
 
                 targetComp = isIP.Success ? ComputerLookup.FindByIp(__instance.targetComp) : ComputerLookup.FindById(__instance.targetComp);
 

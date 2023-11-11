@@ -24,7 +24,6 @@ using Pathfinder.Command;
 using Pathfinder.Util;
 using Pathfinder.Util.XML;
 
-using HacknetArchipelago.Patches; // Would this cause Harmony to not patch these if I removed this?
 using HacknetArchipelago.Static;
 using HacknetArchipelago.Commands;
 
@@ -58,6 +57,9 @@ namespace HacknetArchipelago
 
         private List<string> checkedFlags = new List<string>();
 
+        public static int etasCount = 0;
+        public static int fakeConnectCount = 0;
+
         public override bool Load()
         {
             HarmonyInstance.PatchAll(typeof(HacknetAPMod).Assembly);
@@ -89,6 +91,40 @@ namespace HacknetArchipelago
             archiSession.Items.ItemReceived += CheckReceivedItems;
 
             if(hasCompletedSetup) { CheckAlreadyReceivedItems(); }
+
+            if(hasCompletedSetup)
+            {
+                if(receivedItems.Count > 0) { RestockBackupsServer(); }
+            }
+        }
+
+        public void RestockBackupsServer()
+        {
+            Computer backupNode = ComputerLookup.FindById("archipelagoBackup");
+
+            Folder binFolder = Programs.getFolderAtPath("bin", OS.currentInstance, backupNode.files.root, false);
+            binFolder.files.RemoveAll(x => true);
+
+            foreach(var item in receivedItems)
+            {
+                if (ArchipelagoItems.ItemNamesAndPortIDs.TryGetValue(item.ToLower(), out int receivedItemPort))
+                {
+                    string exeContent = PortExploits.crackExeData[receivedItemPort];
+
+                    SAAddAsset addFileToBackupServerAction = new SAAddAsset
+                    {
+                        FileName = item + ".exe",
+                        FileContents = exeContent,
+                        TargetFolderpath = "bin",
+                        TargetComp = "archipelagoBackup"
+                    };
+
+                    OS.currentInstance.delayer.Post(ActionDelayer.NextTick(), () =>
+                    {
+                        addFileToBackupServerAction.Trigger(OS.currentInstance);
+                    });
+                }
+            }
         }
 
         public static void CreateArchipelagoBackupNode()
@@ -105,23 +141,34 @@ namespace HacknetArchipelago
 
             OS.currentInstance.netMap.nodes.Add(backupNode);
             OS.currentInstance.netMap.visibleNodes.Add(OS.currentInstance.netMap.nodes.Count - 1);
+
+            int backupNodeIndex = OS.currentInstance.netMap.nodes.Count - 1;
+
+            OS.currentInstance.thisComputer.links.Add(backupNodeIndex);
         }
 
-        public static void CheckItem(NetworkItem item)
+        public static void CheckItem(NetworkItem item, bool isReplay = false)
         {
             long itemID = item.Item;
             string itemName = archiSession.Items.GetItemName(itemID);
+
+            // TODO: Clean this up later, make it future-proof
+            if(itemName == "l33t hax0r skills" || itemName == "the sudden urge to play PointClicker" || itemName == "matt") { return; }
 
             Console.WriteLine($"[Hacknet_Archipelago] Received {itemName} with ID: {itemID}");
 
             if(receivedItems.Contains(itemName.ToLower())) { return; }
 
+            Console.WriteLine("[*] User does not have item");
+
             if (itemName == "ETASTrap")
             {
+                etasCount++;
                 ETASTrap();
             }
             else if (itemName == "Fake Connect")
             {
+                fakeConnectCount++;
                 int playerSlot = item.Player;
                 string playerName = archiSession.Players.GetPlayerName(playerSlot);
 
@@ -129,32 +176,42 @@ namespace HacknetArchipelago
             }
             else
             {
-                var receivedItemValue = ArchipelagoItems.ItemNamesAndPortIDs.TryGetValue(itemName, out _);
-
-                if (receivedItemValue)
+                if (ArchipelagoItems.ItemNamesAndPortIDs.TryGetValue(itemName.ToLower(), out int receivedItemPort))
                 {
-                    int receivedItemPort = ArchipelagoItems.ItemNamesAndPortIDs[itemName];
+                    Console.WriteLine("[*] Item is executable");
+
                     var exeContent = PortExploits.crackExeData[receivedItemPort];
+
                     receivedItems.Add(itemName.ToLower());
 
-                    SAAddAsset addFileAction = new SAAddAsset
+                    try
                     {
-                        FileName = itemName + ".exe",
-                        FileContents = exeContent,
-                        TargetFolderpath = "bin",
-                        TargetComp = "playerComp"
-                    };
+                        SAAddAsset addFileAction = new SAAddAsset
+                        {
+                            FileName = itemName + ".exe",
+                            FileContents = exeContent,
+                            TargetFolderpath = "bin",
+                            TargetComp = "playerComp"
+                        };
 
-                    SAAddAsset addFileToBackupServerAction = new SAAddAsset
+                        SAAddAsset addFileToBackupServerAction = new SAAddAsset
+                        {
+                            FileName = itemName + ".exe",
+                            FileContents = exeContent,
+                            TargetFolderpath = "bin",
+                            TargetComp = "archipelagoBackup"
+                        };
+
+                        OS.currentInstance.delayer.Post(ActionDelayer.NextTick(), () =>
+                        {
+                            addFileAction.Trigger(OS.currentInstance);
+                            addFileToBackupServerAction.Trigger(OS.currentInstance);
+                        });
+                    } catch(Exception err)
                     {
-                        FileName = itemName + ".exe",
-                        FileContents = exeContent,
-                        TargetFolderpath = "bin",
-                        TargetComp = "archipelagoBackup"
-                    };
-
-                    addFileAction.Trigger(OS.currentInstance);
-                    addFileToBackupServerAction.Trigger(OS.currentInstance);
+                        Console.WriteLine(err);
+                        throw;
+                    }
                 }
 
                 OS.currentInstance.warningFlash();
@@ -170,14 +227,28 @@ namespace HacknetArchipelago
 
             foreach(var item in afkReceivedItems)
             {
+                long itemID = item.Item;
+                string itemName = archiSession.Items.GetItemName(itemID);
+
+                if(itemName == "ETASTrap")
+                {
+                    int receivedETAS = afkReceivedItems.Count(i => i.Item == itemID);
+                    if(receivedETAS >= etasCount) { continue; }
+                }
+
+                if(itemName == "Fake Connect")
+                {
+                    int receivedFakeConnect = afkReceivedItems.Count(i => i.Item == itemID);
+                    if (receivedFakeConnect >= fakeConnectCount) { continue; }
+                }
+
                 CheckItem(item);
             }
         }
 
         public static void CheckReceivedItems(ReceivedItemsHelper receivedItemsHelper)
         {
-            string item = receivedItemsHelper.PeekItemName();
-            if(OS.currentInstance == null && (item == "ETASTrap" || item == "Fake Connect")) { return; }
+            if(OS.currentInstance == null) { return; }
 
             CheckItem(receivedItemsHelper.DequeueItem());
         }
@@ -214,11 +285,15 @@ namespace HacknetArchipelago
             XElement archipelagoElement = new XElement("HacknetArchipelagoData");
             XAttribute archiItems = new XAttribute("ReceivedItems", receivedItems.Join(delimiter: ","));
             XAttribute archiEvents = new XAttribute("CompletedEvents", completedEvents.Join(delimiter: ","));
+            XAttribute archiFakeConnects = new XAttribute("ReceivedFakeConnects", fakeConnectCount);
+            XAttribute archiETAS = new XAttribute("ReceivedETAS", etasCount);
 
             archipelagoElement.Add(archiItems);
             archipelagoElement.Add(archiEvents);
+            archipelagoElement.Add(archiFakeConnects);
+            archipelagoElement.Add(archiETAS);
 
-            save_event.Save.Add(archipelagoElement);
+            save_event.Save.FirstNode.AddBeforeSelf(archipelagoElement);
         }
 
         public static void ETASTrap()
@@ -246,63 +321,6 @@ namespace HacknetArchipelago
         }
     }
 
-    // Patch DHS mission completion to check if it's an Archipelago location
-    [HarmonyPatch]
-    public class CheckDHSMissionForArchiLoc
-    {
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(DLCHubServer), nameof(DLCHubServer.PlayerAttemptCompleteMission))]
-        static void Postfix(DLCHubServer __instance)
-        {
-            OS os = OS.currentInstance;
-            var currentMission = __instance.SelectedMission;
-
-            string missionName = currentMission.Mission.email.subject;
-
-            long missionLocationID = HacknetAPMod.archiSession.Locations.GetLocationIdFromName("Hacknet", "LABS " + missionName);
-
-            HacknetAPMod.archiSession.Locations.CompleteLocationChecks(new long[] { missionLocationID });
-
-            os.terminal.writeLine("HACKNET_ARCHIPELAGO: You found a check!");
-        }
-    }
-
-    [HarmonyPatch]
-    public class CheckMissionForArchiLoc
-    {
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(ActiveMission), nameof(ActiveMission.finish))]
-        static void Postfix(ActiveMission __instance)
-        {
-            OS os = OS.currentInstance;
-
-            string missionName = __instance.email.subject;
-
-            Dictionary<string, string> locNames = HacknetAPMod.archiLocationNames;
-
-            string archiLocation = locNames[missionName];
-
-            long missionLocationID = HacknetAPMod.archiSession.Locations.GetLocationIdFromName("Hacknet", archiLocation);
-
-            HacknetAPMod.archiSession.Locations.CompleteLocationChecks(missionLocationID);
-
-            os.terminal.writeLine("HACKNET_ARCHIPELAGO: You found a check!");
-        }
-    }
-
-    [HarmonyPatch]
-    public class CheckForTutorialKill
-    {
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(AdvancedTutorial),nameof(AdvancedTutorial.Killed))]
-        static void Postfix()
-        {
-            HacknetAPMod.hasCompletedSetup = true;
-            HacknetAPMod.CreateArchipelagoBackupNode();
-            HacknetAPMod.CheckAlreadyReceivedItems();
-        }
-    }
-
     [SaveExecutor("HacknetSave.HacknetArchipelagoData")]
     public class ReadArchipelagoSaveData : SaveLoader.SaveExecutor
     {
@@ -318,6 +336,12 @@ namespace HacknetArchipelago
 
             HacknetAPMod.receivedItems = receivedItems;
             HacknetAPMod.completedEvents = completedEvents;
+
+            int savedFakeConnectCount = int.Parse(info.Attributes["ReceivedFakeConnects"]);
+            int savedETASCount = int.Parse(info.Attributes["ReceivedETAS"]);
+
+            HacknetAPMod.fakeConnectCount = savedFakeConnectCount;
+            HacknetAPMod.etasCount = savedETASCount;
 
             HacknetAPMod.hasCompletedSetup = true;
         }

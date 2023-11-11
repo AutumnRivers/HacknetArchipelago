@@ -73,7 +73,8 @@ namespace HacknetArchipelago.Static
             { "pointclicker_expert_Unlocked", "ACHV You better not have clicked for those..." },
             { "themeswitch_run_Unlocked", "ACHV Makeover" },
             { "trace_close_Unlocked", "ACHV To the Wire" },
-            { "kill_tutorial_Unlocked", "ACHV Quickdraw" }
+            { "kill_tutorial_Unlocked", "ACHV Quickdraw" },
+            { "rude_response_Unlocked", "ACHV Rude" }
         };
 
         public static readonly Dictionary<string, string> NodeIDToLocations = new Dictionary<string, string>()
