@@ -50,6 +50,7 @@ namespace HacknetArchipelago
         };
 
         public static List<string> receivedItems = new List<string>();
+
         public static List<string> completedEvents = new List<string>();
         public static List<string> checkedNodes = new List<string>();
 
@@ -85,12 +86,9 @@ namespace HacknetArchipelago
 
             CreateArchipelagoBackupNode();
 
-            if(archiSession.ConnectionInfo.Slot > -1)
-            {
-                archiSession.Items.ItemReceived += CheckReceivedItems;
+            archiSession.Items.ItemReceived += CheckReceivedItems;
 
-                if(hasCompletedSetup) { CheckAlreadyReceivedItems(); }
-            }
+            if(hasCompletedSetup) { CheckAlreadyReceivedItems(); }
         }
 
         public static void CreateArchipelagoBackupNode()
@@ -106,14 +104,17 @@ namespace HacknetArchipelago
             OS.currentInstance.thisComputer.files.root.files.Add(archipelagoNote);
 
             OS.currentInstance.netMap.nodes.Add(backupNode);
+            OS.currentInstance.netMap.visibleNodes.Add(OS.currentInstance.netMap.nodes.Count - 1);
         }
 
-        public static bool CheckItem(NetworkItem item)
+        public static void CheckItem(NetworkItem item)
         {
             long itemID = item.Item;
             string itemName = archiSession.Items.GetItemName(itemID);
 
-            if(receivedItems.Contains(itemName.ToLower())) { return false; }
+            Console.WriteLine($"[Hacknet_Archipelago] Received {itemName} with ID: {itemID}");
+
+            if(receivedItems.Contains(itemName.ToLower())) { return; }
 
             if (itemName == "ETASTrap")
             {
@@ -128,13 +129,14 @@ namespace HacknetArchipelago
             }
             else
             {
-                int receivedItemPort = ArchipelagoItems.ItemNamesAndPortIDs.First(e => e.Key == itemName.ToLower()).Value;
-                receivedItems.Add(itemName.ToLower());
+                var receivedItemValue = ArchipelagoItems.ItemNamesAndPortIDs.TryGetValue(itemName, out _);
 
-                var exeContent = PortExploits.crackExeData[receivedItemPort];
-
-                if(ArchipelagoItems.ItemNamesAndPortIDs.ContainsKey(itemName.ToLower()))
+                if (receivedItemValue)
                 {
+                    int receivedItemPort = ArchipelagoItems.ItemNamesAndPortIDs[itemName];
+                    var exeContent = PortExploits.crackExeData[receivedItemPort];
+                    receivedItems.Add(itemName.ToLower());
+
                     SAAddAsset addFileAction = new SAAddAsset
                     {
                         FileName = itemName + ".exe",
@@ -158,8 +160,6 @@ namespace HacknetArchipelago
                 OS.currentInstance.warningFlash();
                 OS.currentInstance.terminal.writeLine("You received " + itemName + "!");
             }
-
-            return true;
         }
 
         public static void CheckAlreadyReceivedItems()
@@ -176,11 +176,10 @@ namespace HacknetArchipelago
 
         public static void CheckReceivedItems(ReceivedItemsHelper receivedItemsHelper)
         {
-            if(OS.currentInstance == null) { return; } // Do not dequeue item if user is not in-game
+            string item = receivedItemsHelper.PeekItemName();
+            if(OS.currentInstance == null && (item == "ETASTrap" || item == "Fake Connect")) { return; }
 
-            CheckItem(receivedItemsHelper.PeekItem());
-
-            receivedItemsHelper.DequeueItem();
+            CheckItem(receivedItemsHelper.DequeueItem());
         }
 
         public void CheckForFlags(OSUpdateEvent os_update)
