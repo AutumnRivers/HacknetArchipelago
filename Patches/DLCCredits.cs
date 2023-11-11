@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Hacknet;
 
 using HarmonyLib;
 
-using HacknetArchipelago.Static;
 using Archipelago.MultiClient.Net.Packets;
+
+using Goals = HacknetArchipelago.Static.ArchipelagoEnums.PlayerGoals;
 
 namespace HacknetArchipelago.Patches
 {
@@ -27,7 +24,9 @@ namespace HacknetArchipelago.Patches
                 HacknetAPMod.completedEvents.Add("finishedDLC");
 
                 int playerGoal = int.Parse(session.DataStorage.GetSlotData()["victory_condition"].ToString());
-                if(playerGoal != (int)ArchipelagoEnums.PlayerGoals.AltitudeLoss) { return; }
+                if(playerGoal != (int)Goals.AltitudeLoss && playerGoal != (int)Goals.Completionist) { return; }
+
+                if (playerGoal == (int)Goals.Completionist && HacknetAPMod.completedEvents != HacknetAPMod.completionistEvents) { return; }
 
                 var statusUpdate = new StatusUpdatePacket
                 {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 using Hacknet;
 
@@ -9,27 +10,23 @@ using BepInEx.Hacknet;
 
 using HarmonyLib;
 
-using Pathfinder.Event.Loading;
-using Pathfinder.Event;
-
 using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.Helpers;
+using Archipelago.MultiClient.Net.Models;
 
 using Pathfinder.Replacements;
 using Pathfinder.Meta.Load;
+using Pathfinder.Event;
 using Pathfinder.Event.Gameplay;
 using Pathfinder.Event.Saving;
+using Pathfinder.Event.Loading;
 using Pathfinder.Command;
+using Pathfinder.Util;
+using Pathfinder.Util.XML;
 
-using HacknetArchipelago.Patches;
+using HacknetArchipelago.Patches; // Would this cause Harmony to not patch these if I removed this?
 using HacknetArchipelago.Static;
 using HacknetArchipelago.Commands;
-
-using Archipelago.MultiClient.Net.Helpers;
-
-using System.Xml.Linq;
-using Pathfinder.Util.XML;
-using Archipelago.MultiClient.Net.Models;
-using Pathfinder.Util;
 
 using xvec2 = Microsoft.Xna.Framework.Vector2;
 
@@ -46,6 +43,11 @@ namespace HacknetArchipelago
         public static ArchipelagoSession archiSession;
 
         public static Dictionary<string, string> archiLocationNames = ArchipelagoLocations.MNameToArchiLocation;
+
+        public static readonly List<string> completionistEvents = new List<string>()
+        {
+            "brokeIntoGibson", "finishedDLC", "brokePortHackHeart"
+        };
 
         public static List<string> receivedItems = new List<string>();
         public static List<string> completedEvents = new List<string>();

@@ -1,6 +1,4 @@
 ﻿using Hacknet;
-using System;
-using System.Linq;
 
 namespace HacknetArchipelago.Commands
 {

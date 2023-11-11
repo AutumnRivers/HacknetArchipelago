@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 using HarmonyLib;
@@ -8,9 +8,6 @@ using Hacknet;
 using Hacknet.Mission;
 
 using Pathfinder.Util;
-
-using MissionGoal = Hacknet.Mission.MisisonGoal;
-using System.Linq;
 
 namespace HacknetArchipelago.Patches.Missions
 {

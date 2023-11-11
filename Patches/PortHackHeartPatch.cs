@@ -10,9 +10,8 @@ using HarmonyLib;
 using Hacknet;
 
 using Archipelago.MultiClient.Net.Packets;
-using Pathfinder.Util;
 
-using HacknetArchipelago.Static;
+using Goals = HacknetArchipelago.Static.ArchipelagoEnums.PlayerGoals;
 
 namespace HacknetArchipelago.Patches
 {
@@ -28,7 +27,12 @@ namespace HacknetArchipelago.Patches
             if(session.ConnectionInfo.Slot >= 0) // Only send the packet when the user is connected, Slot would be -1 if not connected
             {
                 int playerGoal = int.Parse(session.DataStorage.GetSlotData()["victory_condition"].ToString());
-                if(playerGoal != (int)ArchipelagoEnums.PlayerGoals.Heartstopper) { return; }
+                if(playerGoal != (int)Goals.Heartstopper &&
+                    playerGoal != (int)Goals.Completionist) { return; }
+
+                HacknetAPMod.completedEvents.Add("brokePortHackHeart");
+
+                if(playerGoal == (int)Goals.Completionist && HacknetAPMod.completedEvents != HacknetAPMod.completionistEvents) { return; }
 
                 var statusUpdate = new StatusUpdatePacket();
                 statusUpdate.Status = Archipelago.MultiClient.Net.Enums.ArchipelagoClientState.ClientGoal;

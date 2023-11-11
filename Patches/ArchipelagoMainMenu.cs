@@ -12,6 +12,8 @@ using Archipelago.MultiClient.Net.Enums;
 using System;
 using System.IO;
 
+using TextBox = HacknetArchipelago.Replacements.ArchipelagoTextBox;
+
 namespace HacknetArchipelago.Patches
 {
     [HarmonyPatch]
@@ -36,7 +38,14 @@ namespace HacknetArchipelago.Patches
             var screenManager = __instance.screenManager;
             int rightOffset = 600;
 
-            TextItem.doFontLabel(new Vector2(665, 200), "Archipelago Edition", GuiData.smallfont, Color.Orange);
+            TextItem.doFontLabel(new Vector2(520, 147), "Archipelago Edition", GuiData.font, Color.Orange);
+
+            if(!DLC1SessionUpgrader.HasDLC1Installed)
+            {
+                TextItem.doFontLabel(new Vector2(50, screenManager.GraphicsDevice.Viewport.Height - 100), "You don't have Labyrinths installed. Things might break.", GuiData.smallfont, Color.OrangeRed);
+            }
+            TextItem.doFontLabel(new Vector2(50, screenManager.GraphicsDevice.Viewport.Height - 75), "Extensions are disabled while the Archipelago mod is installed.", GuiData.smallfont, Color.Red);
+            TextItem.doFontLabel(new Vector2(50, screenManager.GraphicsDevice.Viewport.Height - 50), "For support, please contact @ohanamatsumae in the Archipelago Discord.", GuiData.smallfont, Color.White);
 
             Rectangle logoRect = new Rectangle()
             {
@@ -90,7 +99,7 @@ namespace HacknetArchipelago.Patches
                 } else
                 {
                     HacknetAPMod.archiSession = ArchipelagoSessionFactory.CreateSession(archiHost, int.Parse(archiPort));
-                    LoginResult archiLogin = HacknetAPMod.archiSession.TryConnectAndLogin("Hacknet", archiSlot, ItemsHandlingFlags.AllItems);
+                    LoginResult archiLogin = HacknetAPMod.archiSession.TryConnectAndLogin("Hacknet", archiSlot, ItemsHandlingFlags.AllItems, password:archiPassword);
 
                     if(archiLogin.Successful)
                     {
