@@ -204,8 +204,6 @@ namespace HacknetArchipelago
                 archiSession.Locations.CompleteLocationChecks(flagLocationID);
 
                 os.terminal.writeLine("HACKNET_ARCHIPELAGO: You found a check!");
-
-                completedEvents.Add(flag);
             }
         }
 
@@ -252,16 +250,11 @@ namespace HacknetArchipelago
 
             string missionName = currentMission.Mission.email.subject;
 
-            if(!HacknetAPMod.completedEvents.Exists(e => e == missionName))
-            {
-                long missionLocationID = HacknetAPMod.archiSession.Locations.GetLocationIdFromName("Hacknet", "LABS " + missionName);
+            long missionLocationID = HacknetAPMod.archiSession.Locations.GetLocationIdFromName("Hacknet", "LABS " + missionName);
 
-                HacknetAPMod.archiSession.Locations.CompleteLocationChecks(new long[] { missionLocationID });
+            HacknetAPMod.archiSession.Locations.CompleteLocationChecks(new long[] { missionLocationID });
 
-                os.terminal.writeLine("HACKNET_ARCHIPELAGO: You found a check!");
-
-                HacknetAPMod.completedEvents.Add(missionName);
-            }
+            os.terminal.writeLine("HACKNET_ARCHIPELAGO: You found a check!");
         }
     }
 
@@ -278,18 +271,13 @@ namespace HacknetArchipelago
 
             Dictionary<string, string> locNames = HacknetAPMod.archiLocationNames;
 
-            if (!HacknetAPMod.completedEvents.Exists(e => e == missionName) && locNames.ContainsKey(missionName))
-            {
-                string archiLocation = locNames[missionName];
+            string archiLocation = locNames[missionName];
 
-                long missionLocationID = HacknetAPMod.archiSession.Locations.GetLocationIdFromName("Hacknet", archiLocation);
+            long missionLocationID = HacknetAPMod.archiSession.Locations.GetLocationIdFromName("Hacknet", archiLocation);
 
-                HacknetAPMod.archiSession.Locations.CompleteLocationChecks(missionLocationID);
+            HacknetAPMod.archiSession.Locations.CompleteLocationChecks(missionLocationID);
 
-                os.terminal.writeLine("HACKNET_ARCHIPELAGO: You found a check!");
-
-                HacknetAPMod.completedEvents.Add(missionName);
-            }
+            os.terminal.writeLine("HACKNET_ARCHIPELAGO: You found a check!");
         }
     }
 
