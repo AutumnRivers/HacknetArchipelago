@@ -26,6 +26,7 @@ namespace HacknetArchipelago.Patches
 
         static bool isConnected = false;
         static bool hasError = false;
+        static bool hasReadLoginFile = false;
 
         static Color archiLogoColor = Color.White;
 
@@ -35,6 +36,34 @@ namespace HacknetArchipelago.Patches
         [HarmonyPatch(typeof(MainMenu),nameof(MainMenu.DrawBackgroundAndTitle))]
         static void Prefix(MainMenu __instance)
         {
+            if (File.Exists("./archipelago.txt") && !hasReadLoginFile)
+            {
+                hasReadLoginFile = true;
+
+                string[] archiDetails = File.ReadAllLines("./archipelago.txt");
+
+                for(int x = 0; x < archiDetails.Length; x++)
+                {
+                    switch(x)
+                    {
+                        case 0:
+                            archiHost = archiDetails[x];
+                            break;
+                        case 1:
+                            archiPort = archiDetails[x];
+                            break;
+                        case 2:
+                            archiSlot = archiDetails[x];
+                            break;
+                        case 3:
+                            archiPassword = archiDetails[x];
+                            break;
+                        default:
+                            continue;
+                    }
+                }
+            }
+
             var screenManager = __instance.screenManager;
             int rightOffset = 600;
 
@@ -107,6 +136,22 @@ namespace HacknetArchipelago.Patches
                         archiLogoColor = Color.Green;
                         isConnected = true;
                         hasError = false;
+
+                        hasReadLoginFile = true;
+
+                        try
+                        {
+                            StreamWriter archiLoginFile = new StreamWriter("./archipelago.txt", false);
+                            archiLoginFile.WriteLineAsync(archiHost).Wait();
+                            archiLoginFile.WriteLineAsync(archiPort).Wait();
+                            archiLoginFile.WriteLineAsync(archiSlot).Wait();
+                            archiLoginFile.WriteLineAsync(archiPassword).Wait();
+                            archiLoginFile.FlushAsync().Wait();
+                        } catch(Exception err)
+                        {
+                            Console.WriteLine("[Hacknet_Archipelago] Failed to write to Archipelago login file:");
+                            Console.WriteLine(err.ToString());
+                        }
                     } else
                     {
                         LoginFailure failure = (LoginFailure)archiLogin;

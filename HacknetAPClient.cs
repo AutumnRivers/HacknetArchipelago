@@ -37,7 +37,7 @@ namespace HacknetArchipelago
     {
         public const string ModGUID = "autumnrivers.hacknetapclient";
         public const string ModName = "Hacknet_Archipelago";
-        public const string ModVer = "0.2.1";
+        public const string ModVer = "0.3.0";
 
         public static ArchipelagoSession archiSession;
 
@@ -55,7 +55,7 @@ namespace HacknetArchipelago
 
         public static bool hasCompletedSetup = false;
 
-        private List<string> checkedFlags = new List<string>();
+        public static List<string> checkedFlags = new List<string>();
 
         public static int etasCount = 0;
         public static int fakeConnectCount = 0;
@@ -71,9 +71,11 @@ namespace HacknetArchipelago
 
             Action<OSLoadedEvent> fixCampaign = StartCampaignFix;
             Action<SaveEvent> archipelagoSave = InjectArchipelagoSaveData;
+            Action<OSUpdateEvent> checkForFlags = CheckForFlags;
 
             EventManager<OSLoadedEvent>.AddHandler(fixCampaign);
             EventManager<SaveEvent>.AddHandler(archipelagoSave);
+            EventManager<OSUpdateEvent>.AddHandler(checkForFlags);
 
             Settings.AllowExtensionMode = false;
             
@@ -152,8 +154,9 @@ namespace HacknetArchipelago
             long itemID = item.Item;
             string itemName = archiSession.Items.GetItemName(itemID);
 
-            // TODO: Clean this up later, make it future-proof
-            if(itemName == "l33t hax0r skills" || itemName == "the sudden urge to play PointClicker" || itemName == "matt") { return; }
+            if(
+                (itemName == "l33t hax0r skillz" || itemName == "the sudden urge to play PointClicker" || itemName == "matt")
+                && isReplay) { return; }
 
             Console.WriteLine($"[Hacknet_Archipelago] Received {itemName} with ID: {itemID}");
 
@@ -242,7 +245,7 @@ namespace HacknetArchipelago
                     if (receivedFakeConnect >= fakeConnectCount) { continue; }
                 }
 
-                CheckItem(item);
+                CheckItem(item, true);
             }
         }
 
@@ -250,7 +253,20 @@ namespace HacknetArchipelago
         {
             if(OS.currentInstance == null) { return; }
 
-            CheckItem(receivedItemsHelper.DequeueItem());
+            while(receivedItemsHelper.Any())
+            {
+                string itemName = receivedItemsHelper.PeekItemName();
+
+                if(
+                    (itemName == "l33t hax0r skillz" || itemName == "the sudden urge to play PointClicker" || itemName == "matt")
+                    || !receivedItems.Contains(itemName.ToLower()))
+                {
+                    CheckItem(receivedItemsHelper.DequeueItem());
+                } else
+                {
+                    receivedItemsHelper.DequeueItem();
+                }
+            }
         }
 
         public void CheckForFlags(OSUpdateEvent os_update)
@@ -262,8 +278,6 @@ namespace HacknetArchipelago
             {
                 if(checkedFlags.Contains(flag)) { continue; }
 
-                checkedFlags.Add(flag);
-
                 var flagLocations = ArchipelagoLocations.FlagsToLocations;
 
                 if(!flagLocations.ContainsKey(flag)) { continue; }
@@ -272,9 +286,13 @@ namespace HacknetArchipelago
 
                 long flagLocationID = archiSession.Locations.GetLocationIdFromName("Hacknet", locationName);
 
+                Console.WriteLine($"User got flag {flag} with location ID of {flagLocationID}");
+
                 if(flagLocationID == -1) { continue; }
 
                 archiSession.Locations.CompleteLocationChecks(flagLocationID);
+
+                checkedFlags.Add(flag);
 
                 os.terminal.writeLine("HACKNET_ARCHIPELAGO: You found a check!");
             }
@@ -285,11 +303,13 @@ namespace HacknetArchipelago
             XElement archipelagoElement = new XElement("HacknetArchipelagoData");
             XAttribute archiItems = new XAttribute("ReceivedItems", receivedItems.Join(delimiter: ","));
             XAttribute archiEvents = new XAttribute("CompletedEvents", completedEvents.Join(delimiter: ","));
+            XAttribute archiFlags = new XAttribute("CheckedFlags", checkedFlags.Join(delimiter: ","));
             XAttribute archiFakeConnects = new XAttribute("ReceivedFakeConnects", fakeConnectCount);
             XAttribute archiETAS = new XAttribute("ReceivedETAS", etasCount);
 
             archipelagoElement.Add(archiItems);
             archipelagoElement.Add(archiEvents);
+            archipelagoElement.Add(archiFlags);
             archipelagoElement.Add(archiFakeConnects);
             archipelagoElement.Add(archiETAS);
 
@@ -330,12 +350,15 @@ namespace HacknetArchipelago
 
             string[] itemsArray = info.Attributes["ReceivedItems"].Split(delimiterChar);
             string[] eventsArray = info.Attributes["CompletedEvents"].Split(delimiterChar);
+            string[] flagsArray = info.Attributes["CheckedFlags"].Split(delimiterChar);
 
             List<string> receivedItems = itemsArray.ToList();
             List<string> completedEvents = eventsArray.ToList();
+            List<string> checkedFlags = flagsArray.ToList();
 
             HacknetAPMod.receivedItems = receivedItems;
             HacknetAPMod.completedEvents = completedEvents;
+            HacknetAPMod.checkedFlags = checkedFlags;
 
             int savedFakeConnectCount = int.Parse(info.Attributes["ReceivedFakeConnects"]);
             int savedETASCount = int.Parse(info.Attributes["ReceivedETAS"]);

@@ -15,40 +15,6 @@ namespace HacknetArchipelago.Patches
     [HarmonyPatch]
     public class NodeChecks
     {
-        /*[HarmonyPostfix]
-        [HarmonyPatch(typeof(Computer),nameof(Computer.log))]
-        static void Postfix(Computer __instance, string message)
-        {
-            if (HacknetAPMod.checkedNodes.Contains(__instance.idName)) { return; }
-
-            if(message.EndsWith("Became_Admin"))
-            {
-                Console.WriteLine("[HacknetAP] User became admin on " + __instance.idName);
-
-                string playerIP = "127.0.0.1"; //OS.currentInstance.thisComputer.ip;
-
-                if(!message.Contains(playerIP)) { return; }
-
-                HacknetAPMod.checkedNodes.Add(__instance.idName);
-
-                if(HacknetAPMod.archiSession.ConnectionInfo.Slot == -1) { return; }
-
-                var nodeLocations = ArchipelagoLocations.NodeIDToLocations;
-
-                if(!nodeLocations.ContainsKey(__instance.idName)) { return; }
-
-                CheckForGibson(__instance);
-
-                string locationName = nodeLocations[__instance.idName];
-
-                long locationID = HacknetAPMod.archiSession.Locations.GetLocationIdFromName("Hacknet", locationName);
-
-                if(locationID == -1) { return; }
-
-                HacknetAPMod.archiSession.Locations.CompleteLocationChecks(locationID);
-            }
-        }*/
-
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Computer), nameof(Computer.giveAdmin))]
         static void Postfix(Computer __instance)

@@ -20,13 +20,13 @@ namespace HacknetArchipelago.Patches.Missions
 
                 Dictionary<string, string> locNames = HacknetAPMod.archiLocationNames;
 
-                string archiLocation = locNames[missionName];
+                if(locNames.TryGetValue(missionName, out string archiLocation)) {
+                    long missionLocationID = HacknetAPMod.archiSession.Locations.GetLocationIdFromName("Hacknet", archiLocation);
 
-                long missionLocationID = HacknetAPMod.archiSession.Locations.GetLocationIdFromName("Hacknet", archiLocation);
+                    HacknetAPMod.archiSession.Locations.CompleteLocationChecks(missionLocationID);
 
-                HacknetAPMod.archiSession.Locations.CompleteLocationChecks(missionLocationID);
-
-                os.terminal.writeLine("HACKNET_ARCHIPELAGO: You found a check!");
+                    os.terminal.writeLine("HACKNET_ARCHIPELAGO: You found a check!");
+                }
             }
         }
     }
