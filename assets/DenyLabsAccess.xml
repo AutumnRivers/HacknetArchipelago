@@ -1,0 +1,31 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<mission id="labs_norequireexecs" activeCheck="true" shouldIgnoreSenderVerification="true">
+    <goals>
+    </goals>
+
+    <nextMission IsSilent="false">NONE</nextMission>
+
+    <posting title="New Mission!"></posting>
+
+    <email>
+        <sender>Archipelago</sender>
+        <subject>Access to Kaguya Trials Denied</subject>
+        <body>Whoops! You can't access the Kaguya Trials yet -- you're missing some items.
+
+Check your Archipelago tracker, and make sure you have the following items:
+- Kaguya Trials Access
+- TorrentStreamInjector
+- FTPBounce and/or FTPSprint
+
+If you're missing anything above, sorry! You're gonna have to wait to access Labyrinths until you've found those.
+
+If you do have everything listed above and you're still getting this e-mail, then it sounds like I messed up! I am a raft floating on an ocean of pure shame.
+Save your game, report this as a bug, and include your save file. Additionally, including your Archipelago session spoiler log would also be immensely helpful.
+
+Happy travels!
+
+- Autumn Rivers</body>
+        <attachments>
+        </attachments>
+    </email>
+</mission>

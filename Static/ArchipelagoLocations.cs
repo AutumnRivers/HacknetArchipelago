@@ -17,8 +17,8 @@ namespace HacknetArchipelago.Static
             { "Point Clicker", "ENT PointClicker" },
             { "The famous counter-hack", "ENT The Famous Counter-Hack" },
             { "Back to School", "ENT Back to School" },
-            { "X-C Project", "ENT X-C Project" },
-            { "eOS Device Scanning", "ENT eOS Intro" },
+            { "Internal investigations", "ENT X-C Project" },
+            { "Fwd: eOS Stuff", "ENT eOS Intro" },
             { "Smash N' Grab", "ENT Smash N' Grab" },
             { "Aggression must be Punished", "ENT Naix" },
 

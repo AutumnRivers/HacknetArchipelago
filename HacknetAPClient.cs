@@ -177,6 +177,15 @@ namespace HacknetArchipelago
 
                 FakeConnectTrap(playerName);
             }
+            else if (ArchipelagoItems.ItemToFlags.TryGetValue(itemName, out string flagToAdd))
+            {
+                if(OS.currentInstance.Flags.HasFlag(flagToAdd)) { return; }
+
+                OS.currentInstance.Flags.AddFlag(flagToAdd);
+
+                OS.currentInstance.warningFlash();
+                OS.currentInstance.terminal.writeLine("You received " + itemName + "!");
+            }
             else
             {
                 if (ArchipelagoItems.ItemNamesAndPortIDs.TryGetValue(itemName.ToLower(), out int receivedItemPort))
@@ -306,12 +315,14 @@ namespace HacknetArchipelago
             XAttribute archiFlags = new XAttribute("CheckedFlags", checkedFlags.Join(delimiter: ","));
             XAttribute archiFakeConnects = new XAttribute("ReceivedFakeConnects", fakeConnectCount);
             XAttribute archiETAS = new XAttribute("ReceivedETAS", etasCount);
+            XAttribute modVersion = new XAttribute("SaveVersion", ModVer); // This is never read from, and is only for support
 
             archipelagoElement.Add(archiItems);
             archipelagoElement.Add(archiEvents);
             archipelagoElement.Add(archiFlags);
             archipelagoElement.Add(archiFakeConnects);
             archipelagoElement.Add(archiETAS);
+            archipelagoElement.Add(modVersion);
 
             save_event.Save.FirstNode.AddBeforeSelf(archipelagoElement);
         }

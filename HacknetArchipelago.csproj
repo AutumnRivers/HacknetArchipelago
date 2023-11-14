@@ -98,6 +98,7 @@
     <Compile Include="Patches\CheckForArchiExes.cs" />
     <Compile Include="Patches\CloseServerOnQuit.cs" />
     <Compile Include="Patches\DLCCredits.cs" />
+    <Compile Include="Patches\Missions\KaguyaTrialsAccess.cs" />
     <Compile Include="Patches\Missions\MissionChecks.cs" />
     <Compile Include="Patches\Missions\PatchMissions.cs" />
     <Compile Include="Patches\NodeChecks.cs" />
@@ -106,9 +107,11 @@
     <Compile Include="Patches\TutorialSetup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Replacements\ArchipelagoTextBox.cs" />
+    <Compile Include="Replacements\MissionHubServer_DrawMissionEntry.cs" />
     <Compile Include="Static\ArchipelagoEnums.cs" />
     <Compile Include="Static\ArchipelagoItems.cs" />
     <Compile Include="Static\ArchipelagoLocations.cs" />
+    <Compile Include="Static\ArchipelagoMissionRules.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -52,9 +52,9 @@ namespace HacknetArchipelago.Static
             "netmaporganizer"
         };
 
-        public static readonly Dictionary<string, string> ItemFlags = new Dictionary<string, string>()
+        public static readonly Dictionary<string, string> ItemToFlags = new Dictionary<string, string>()
         {
-            { "Labyrinths_Linker", "hasLabsLinker" }
+            { "Kaguya Trials Access", "CanAccessTrials" }
         };
     }
 }
