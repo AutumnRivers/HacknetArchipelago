@@ -28,7 +28,7 @@ namespace HacknetArchipelago.Patches
 
             foreach(var item in items)
             {
-                int playerExecs = int.Parse(session.DataStorage.GetSlotData()["victory_condition"].ToString());
+                int playerExecs = int.Parse(session.DataStorage.GetSlotData()["shuffle_executables"].ToString());
                 
                 if(
                     playerExecs == (int)ArchipelagoEnums.ShuffleExecutableTypes.ProgressiveAndUseful &&

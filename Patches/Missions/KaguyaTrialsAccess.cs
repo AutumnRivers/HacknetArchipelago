@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Hacknet;
 
 using HarmonyLib;
+
 using Pathfinder.Util;
 
 namespace HacknetArchipelago.Patches.Missions
@@ -16,7 +17,7 @@ namespace HacknetArchipelago.Patches.Missions
     {
         [HarmonyPrefix]
         [HarmonyPatch(typeof(MissionHubServer),nameof(MissionHubServer.addMission))]
-        static bool Prefix(MissionHubServer __instance, ActiveMission mission)
+        static bool Prefix(ActiveMission mission)
         {
             if(mission.email.subject == "The Kaguya Trials")
             {
@@ -34,26 +35,31 @@ namespace HacknetArchipelago.Patches.Missions
     public class KaguyaTrialsLoadCheck
     {
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(ComputerLoader),nameof(ComputerLoader.loadMission))]
-        static bool Prefix(ref string filename)
+        [HarmonyPatch(typeof(ActiveMission),nameof(ActiveMission.sendEmail))]
+        static bool Prefix(ActiveMission __instance, OS os)
         {
-            OS os = OS.currentInstance;
-            var receivedItems = HacknetAPMod.receivedItems;
+            string filename = __instance.reloadGoalsSourceFile;
 
-            if(filename.EndsWith("DLCConnectorIntro.xml"))
+            if (filename.EndsWith("DLCConnectorIntro.xml"))
             {
+                var receivedItems = HacknetAPMod.receivedItems;
+
                 bool denyMission = false;
                 bool isEntropy = filename.Contains("Entropy");
 
                 if (!os.Flags.HasFlag("CanAccessTrials")) { denyMission = true; }
 
-                if(!receivedItems.Contains("torrentstreaminjector")
+                if (!receivedItems.Contains("torrentstreaminjector")
                     || (!receivedItems.Contains("ftpbounce") && !receivedItems.Contains("ftpsprint"))) { denyMission = true; }
 
-                if(denyMission) {
-                    filename = "./BepInEx/plugins/assets/DenyLabsAccess.xml";
+                if (denyMission)
+                {
+                    ActiveMission denyMissionFile = (ActiveMission)ComputerLoader.readMission("./BepInEx/plugins/assets/DenyLabsAccess.xml");
 
-                    if(isEntropy)
+                    os.currentMission = denyMissionFile;
+                    __instance.email = denyMissionFile.email;
+
+                    if (isEntropy)
                     {
                         Computer entropyComp = ComputerLookup.FindById("entropy00");
 
@@ -63,7 +69,8 @@ namespace HacknetArchipelago.Patches.Missions
                         ActiveMission m = (ActiveMission)ComputerLoader.readMission("./Content/DLC/Missions/BaseGameConnectors/Missions/EntropyDLCConnectorIntro.xml");
                         os.branchMissions = branchMissions;
                         entropyListing.addMisison(m, true);
-                    } else
+                    }
+                    else
                     {
                         Computer csecComp = ComputerLookup.FindById("mainHub");
 

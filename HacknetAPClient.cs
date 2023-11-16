@@ -37,7 +37,7 @@ namespace HacknetArchipelago
     {
         public const string ModGUID = "autumnrivers.hacknetapclient";
         public const string ModName = "Hacknet_Archipelago";
-        public const string ModVer = "0.3.0";
+        public const string ModVer = "0.3.1";
 
         public static ArchipelagoSession archiSession;
 
@@ -262,7 +262,7 @@ namespace HacknetArchipelago
         {
             if(OS.currentInstance == null) { return; }
 
-            while(receivedItemsHelper.Any())
+            while(receivedItemsHelper.Any() && OS.currentInstance != null)
             {
                 string itemName = receivedItemsHelper.PeekItemName();
 
@@ -316,6 +316,7 @@ namespace HacknetArchipelago
             XAttribute archiFakeConnects = new XAttribute("ReceivedFakeConnects", fakeConnectCount);
             XAttribute archiETAS = new XAttribute("ReceivedETAS", etasCount);
             XAttribute modVersion = new XAttribute("SaveVersion", ModVer); // This is never read from, and is only for support
+            XAttribute roomSeed = new XAttribute("RoomSeed", archiSession.RoomState.Seed);
 
             archipelagoElement.Add(archiItems);
             archipelagoElement.Add(archiEvents);
@@ -323,6 +324,7 @@ namespace HacknetArchipelago
             archipelagoElement.Add(archiFakeConnects);
             archipelagoElement.Add(archiETAS);
             archipelagoElement.Add(modVersion);
+            archipelagoElement.Add(roomSeed);
 
             save_event.Save.FirstNode.AddBeforeSelf(archipelagoElement);
         }
@@ -358,6 +360,14 @@ namespace HacknetArchipelago
         public void LoadSaveData(ElementInfo info)
         {
             char delimiterChar = ',';
+
+            string savedRoom = info.Attributes["RoomSeed"];
+
+            if (HacknetAPMod.archiSession.RoomState.Seed != savedRoom)
+            {
+                throw new Exception("Save file room seed does not match current room seed -- if you're using the same room, something went wrong.\n" + 
+                    "Otherwise, this is working as expected, and you should not report this error. Create a new in-game session.");
+            }
 
             string[] itemsArray = info.Attributes["ReceivedItems"].Split(delimiterChar);
             string[] eventsArray = info.Attributes["CompletedEvents"].Split(delimiterChar);

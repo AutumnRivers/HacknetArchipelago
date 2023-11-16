@@ -22,6 +22,9 @@ namespace HacknetArchipelago.Static
             { "Smash N' Grab", "ENT Smash N' Grab" },
             { "Aggression must be Punished", "ENT Naix" },
 
+            { "Re: Re: Are you Kidding me?", "NAIX Recover" }, // In case user traps Naix
+            { "gg wp", "NAIX Recover" }, // In case user traps Naix
+
             { "CSEC Invitation", "CSEC Invitation OR /el Sec Completion" },
             { "A Victory - Perhaps a turning point", "CSEC Invitation OR /el Sec Completion" }, // For /el Sec Completion
             { "CSEC Invitation - Affirmation", "CSEC CFC Herbs and Spices" },
