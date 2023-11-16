@@ -53,33 +53,33 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\..\SteamLibrary\steamapps\common\Hacknet\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>refs\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Archipelago.MultiClient.Net, Version=5.0.6.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\Archipelago.MultiClient.Net.5.0.6\lib\net45\Archipelago.MultiClient.Net.dll</HintPath>
+      <HintPath>refs\Archipelago.MultiClient.Net.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx.Core">
-      <HintPath>..\..\..\..\SteamLibrary\steamapps\common\Hacknet\BepInEx\core\BepInEx.Core.dll</HintPath>
+      <HintPath>refs\BepInEx.Core.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx.Hacknet">
-      <HintPath>..\..\..\..\SteamLibrary\steamapps\common\Hacknet\BepInEx\core\BepInEx.Hacknet.dll</HintPath>
+      <HintPath>refs\BepInEx.Hacknet.dll</HintPath>
     </Reference>
     <Reference Include="FNA">
-      <HintPath>..\..\..\..\SteamLibrary\steamapps\common\Hacknet\FNA.dll</HintPath>
+      <HintPath>refs\FNA.dll</HintPath>
     </Reference>
-    <Reference Include="Hacknet">
-      <HintPath>..\..\..\..\SteamLibrary\steamapps\common\Hacknet\Hacknet.exe</HintPath>
+    <Reference Include="HacknetPathfinder">
+      <HintPath>refs\HacknetPathfinder.exe</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil, Version=0.11.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\SteamLibrary\steamapps\common\Hacknet\BepInEx\core\Mono.Cecil.dll</HintPath>
+      <HintPath>refs\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="MonoMod.Utils, Version=21.9.19.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\SteamLibrary\steamapps\common\Hacknet\BepInEx\core\MonoMod.Utils.dll</HintPath>
+      <HintPath>refs\MonoMod.Utils.dll</HintPath>
     </Reference>
     <Reference Include="PathfinderAPI">
-      <HintPath>..\..\..\..\SteamLibrary\steamapps\common\Hacknet\BepInEx\plugins\PathfinderAPI.dll</HintPath>
+      <HintPath>refs\PathfinderAPI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
