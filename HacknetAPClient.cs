@@ -37,7 +37,7 @@ namespace HacknetArchipelago
     {
         public const string ModGUID = "autumnrivers.hacknetapclient";
         public const string ModName = "Hacknet_Archipelago";
-        public const string ModVer = "0.3.1";
+        public const string ModVer = "0.3.2";
 
         public static ArchipelagoSession archiSession;
 
@@ -54,6 +54,8 @@ namespace HacknetArchipelago
         public static List<string> checkedNodes = new List<string>();
 
         public static bool hasCompletedSetup = false;
+        public static bool doNotFireEtas = false;
+        public static bool etasIsQueued = false;
 
         public static List<string> checkedFlags = new List<string>();
 
@@ -68,6 +70,7 @@ namespace HacknetArchipelago
             CommandManager.RegisterCommand("architest", DebugCommands.SendTestPacket, false, true);
             CommandManager.RegisterCommand("fakeconnect", DebugCommands.TestFakeConnect, false, true);
             CommandManager.RegisterCommand("archistatus", ArchipelagoStatusCommand.Command, true, false);
+            CommandManager.RegisterCommand("genrandomirc", DebugCommands.GenerateRandomIRC, false, false);
 
             Action<OSLoadedEvent> fixCampaign = StartCampaignFix;
             Action<SaveEvent> archipelagoSave = InjectArchipelagoSaveData;
@@ -166,6 +169,12 @@ namespace HacknetArchipelago
 
             if (itemName == "ETASTrap")
             {
+                if(doNotFireEtas)
+                {
+                    etasIsQueued = true;
+                    return;
+                }
+
                 etasCount++;
                 ETASTrap();
             }
@@ -176,6 +185,12 @@ namespace HacknetArchipelago
                 string playerName = archiSession.Players.GetPlayerName(playerSlot);
 
                 FakeConnectTrap(playerName);
+            } else if(itemName == "Random IRC Log")
+            {
+                GivePlayerRandomIRCLog();
+
+                OS.currentInstance.warningFlash();
+                OS.currentInstance.terminal.writeLine("You received a random IRC log!");
             }
             else if (ArchipelagoItems.ItemToFlags.TryGetValue(itemName, out string flagToAdd))
             {
@@ -307,6 +322,15 @@ namespace HacknetArchipelago
             }
         }
 
+        public static void GivePlayerRandomIRCLog()
+        {
+            Computer playerComp = OS.currentInstance.thisComputer;
+
+            FileEntry randomIRCLog = new FileEntry();
+
+            playerComp.files.root.files.Add(randomIRCLog);
+        }
+
         public void InjectArchipelagoSaveData(SaveEvent save_event)
         {
             XElement archipelagoElement = new XElement("HacknetArchipelagoData");
@@ -331,6 +355,8 @@ namespace HacknetArchipelago
 
         public static void ETASTrap()
         {
+            etasIsQueued = false;
+
             OS os = OS.currentInstance;
 
             TrackerCompleteSequence.TriggerETAS(os);

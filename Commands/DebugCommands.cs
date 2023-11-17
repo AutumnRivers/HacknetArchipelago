@@ -10,7 +10,6 @@ namespace HacknetArchipelago.Commands
 {
     public class DebugCommands
     {
-
         public static void CheckReceivedItems(OS os, string[] args)
         {
             if(!OS.DEBUG_COMMANDS) { return; }
@@ -35,6 +34,15 @@ namespace HacknetArchipelago.Commands
 
             session.Socket.SendPacket(new BouncePacket());
             session.Socket.SendPacket(new SayPacket() { Text = "Hello, Archipelago!" });
+        }
+
+        public static void GenerateRandomIRC(OS os, string[] args)
+        {
+            if(!OS.DEBUG_COMMANDS) { return; }
+
+            HacknetAPMod.GivePlayerRandomIRCLog();
+
+            os.terminal.writeLine("Generated random IRC log");
         }
     }
 }
